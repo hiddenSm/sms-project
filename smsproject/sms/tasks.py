@@ -147,20 +147,14 @@ class SmsSystem():
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'text/plain',
-            'x-api-key': x_api_key #'leu9beYayciDSpgRHxSJxu9WsR7yG2pdCeoUnukXLef7FqoBRnRCBz05BTRWDjGZ'
+            'x-api-key': x_api_key 
         }
         
         body = {
-            "mobile": phone, # "9378524398", 
-            "templateId": template_code, #365137,
+            "mobile": phone,
+            "templateId": template_code,
             
             "parameters": SmsSystem().create_parameters(engine.name, template_tokens, tokens, phone, template_code),
-            # "parameters": [
-            #     {
-            #         "name": "TOKEN", 
-            #         "value": "12345" # token_value (number 1)
-            #     }
-            # ]
         }
 
         try:
@@ -186,7 +180,7 @@ class SmsSystem():
             capture_exception(ed)
             print('this template doent exist in this engine')
 
-        API_KEY = engine.provider_token # '34343348717A64303550316C517965364D7063577A413D3D'
+        API_KEY = engine.provider_token
         # url = f'{engine.api_url}/{API_KEY}/verify/lookup.json'
         url = f'{engine.api_url}/{API_KEY}/verify*****/lookup.json'
 
@@ -200,11 +194,7 @@ class SmsSystem():
             print('UnboundLocalError')
             capture_exception(eu)
 
-        # params = {
-        #     'receptor': phone, # phone
-        #     'token': '12345', # token_value (number 1)
-        #     'template': template_code # 'pingiAcademyBirthNotif',
-        # }
+
 
         response = requests.post(url, params=params)
         logger.debug(f"Kavenegar Response: {response.json()}")
