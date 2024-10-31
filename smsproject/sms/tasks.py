@@ -3,7 +3,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from rest_framework import status
 from django.db import transaction
-from sentry_sdk import capture_exception, capture_message #, add_breadcrumb, set_user
+from sentry_sdk import capture_exception, capture_message
 
 from .models import VerifyRequests, Engine, Templates, TemplatesEngine
 
@@ -93,7 +93,6 @@ def check_pending_requests():
         logger.info(f'trying again to send code to {request.phone}')
 
 
-## this should be moved in some other file (like utils.py)
 # the Engine.name should be setted as the coded engine in this class (check the if's, and inputed engine.name)
 class SmsSystem():
     def create_parameters(self, engine, template_tokens, tokens, phone, template_code):
