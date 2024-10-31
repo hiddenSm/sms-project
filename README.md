@@ -74,7 +74,36 @@ git clone https://github.com/hiddenSm/sms-project.git
 cd sms-project
 ```
 
-### 
+## Model Relationships & Configuration
+
+<details>
+<summary><strong>Model Relationships</strong></summary>
+
+- **Engine**: Represents an SMS provider, storing API details such as `name`, `api_url`, and `provider_token`.
+- **Templates**: A template model with a unique `template_id` used across different engines.
+- **TemplatesEngine**: Connects **Engine** and **Templates** models by mapping each engine's internal `template_code` to a standard `template_id`, with `token_keys` specifying the required tokens for each template.
+- **VerifyRequests**: Logs requests, including sender details, the selected engine (`system`), status (`flag`), number of attempts (`tries`), and token values.
+
+</details>
+
+<details>
+<summary><strong>Necessary Configurations</strong></summary>
+
+Before running the project, set up the following configurations in the Django admin:
+
+1. **Engine**:
+   - Add each SMS provider (e.g., SMS.IR, Kavenegar) with the necessary API details.
+
+2. **Templates**:
+   - Define template entries with unique `template_id` values that are shared across all engines.
+
+3. **TemplatesEngine**:
+   - Map each template to the corresponding engine using `template_code` and specify required `token_keys`.
+
+Once configured, `VerifyRequests` will log and track requests as the system operates.
+
+</details> 
+
 
 ## Usage
 

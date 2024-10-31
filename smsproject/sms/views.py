@@ -3,6 +3,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from sentry_sdk import capture_exception, capture_message, add_breadcrumb, set_user
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .models import VerifyRequests
 from .serializers import VerifyRequestsSerializer, SendSmsSerializer
@@ -11,6 +13,26 @@ from .tasks import process_request
 # Create your views here.
 
 class SendSmsView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Send an SMS",
+        operation_description="This endpoint allows authenticated users to send an SMS.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'phone': openapi.Schema(type=openapi.TYPE_STRING, description='Phone number to send SMS'),
+                'token_value': openapi.Schema(type=openapi.TYPE_OBJECT, description='Token value for verification'),
+                'template_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the template to use'),
+            },
+            required=['phone', 'token_value', 'template_id'],
+        ),
+        responses={
+            202: openapi.Response('Request is being processed'),
+            400: openapi.Response('Invalid input', schema=openapi.Schema(type=openapi.TYPE_OBJECT, properties={'error': openapi.Schema(type=openapi.TYPE_STRING)})),
+            401: openapi.Response('Unauthorized'),
+            500: openapi.Response('Internal server error'),
+        }
+    )
+
     def post(self, request):
         # capture_message("Test message to check Sentry integration", level="info")
         if request.user.is_authenticated:
@@ -50,6 +72,7 @@ class SendSmsView(APIView):
                 capture_message("SMS request is being processed", level="info")
             
                 return Response({'status': 'Request is being processed'}, status=status.HTTP_202_ACCEPTED)
+            
             except Exception as e:
                 add_breadcrumb(message="Exception during verify request save or task processing", level="error")
                 capture_exception(e)
