@@ -86,6 +86,22 @@ Each SMS request is tracked in the database with the following information:
 
 </details>
 
+
+## Usage
+
+### API Endpoints
+Send SMS Endpoint: `/sendsms/` - Accepts POST requests with `phone, token_value, template_id` parameters to initiate an SMS request. <br >
+
+**Swagger**:
+You can check the request and response samples on `/swagger/`.
+
+<!--- 
+## Background Tasks
+   - **process_request**: Processes an SMS request and attempts to send it via SMS.IR. If SMS.IR fails, the request is retried using Kavenegar. <br >
+   - **check_pending_requests**: A periodic task to retry any SMS requests with a pending status.
+--->
+
+
 ## Installation and Setup <br />
 
 ### Prerequisites <br />
@@ -125,20 +141,6 @@ Before running the project, set up the following configurations in the Django ad
 Once configured, `VerifyRequests` will log and track requests as the system operates.
 
 </details> 
-
-
-## Usage
-
-### API Endpoints
-Send SMS Endpoint: `/sendsms/` - Accepts POST requests with `phone, token_value, template_id` parameters to initiate an SMS request. <br >
-
-**Swagger**:
-You can check the request and response samples on `/swagger/`.
-
-
-## Background Tasks
-   - **process_request**: Processes an SMS request and attempts to send it via SMS.IR. If SMS.IR fails, the request is retried using Kavenegar. <br >
-   - **check_pending_requests**: A periodic task to retry any SMS requests with a pending status.
 
 
 ## Access the application:
