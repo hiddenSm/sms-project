@@ -5,42 +5,64 @@ This project is a Django-based SMS verification system that integrates with mult
 
 
 ## How It Works
-This project is designed to reliably send SMS messages using two providers, SMS.IR and Kavenegar, with automatic fallback and error handling. Here’s a breakdown of how it all works:
 
-### 1. Sending an SMS Request 
-<!-- **1. Sending an SMS Request** <br /><br /> -->
+<details>
+<summary><strong>Sending an SMS Request</strong></summary>
+
 When a user or client makes a request to the `/sendsms/` endpoint:
-   - **Endpoint:** `/sendsms/`
-   - **Method:** `POST`
-   - The request body includes the phone number, token values, and template ID required to send the SMS.
-   - Before sending, the request goes through validation using serializers, ensuring required fields are present.
+- **Endpoint:** `/sendsms/`
+- **Method:** `POST`
+- The request body includes the phone number, token values, and template ID required to send the SMS.
+- Before sending, the request goes through validation using serializers, ensuring required fields are present.
 
-### 2. Processing the Request with Celery
+</details>
+
+<details>
+<summary><strong>Processing the Request with Celery</strong></summary>
+
 Once the request is validated:
-   - The `SendSmsView` view enqueues a task to Celery, which handles the SMS request in the background.
-   - **Benefits of using Celery:** This allows the main API to respond quickly while offloading the SMS sending process to Celery, which processes it asynchronously.
+- The `SendSmsView` view enqueues a task to Celery, which handles the SMS request in the background.
+- **Benefits of using Celery:** This allows the main API to respond quickly while offloading the SMS sending process to Celery, which processes it asynchronously.
 
-### 3. Sending with Primary Provider: SMS.IR
+</details>
+
+<details>
+<summary><strong>Sending with Primary Provider: SMS.IR</strong></summary>
+
 The `process_request` task first tries to send the SMS using **SMS.IR**:
-   - If SMS.IR successfully sends the SMS, the status is recorded as `DONE`.
-   - If SMS.IR fails (e.g., due to network issues or provider limitations), Celery will log the failure and proceed to the next step.
+- If SMS.IR successfully sends the SMS, the status is recorded as `DONE`.
+- If SMS.IR fails (e.g., due to network issues or provider limitations), Celery will log the failure and proceed to the next step.
 
-### 4. Fallback to Secondary Provider: Kavenegar
+</details>
+
+<details>
+<summary><strong>Fallback to Secondary Provider: Kavenegar</strong></summary>
+
 If the SMS.IR request fails:
-   - The task automatically attempts to send the SMS via **Kavenegar**.
-   - If Kavenegar also fails, the system logs the request as `FAILED`.
-   - If Kavenegar succeeds, the status is recorded as `DONE`.
+- The task automatically attempts to send the SMS via **Kavenegar**.
+- If Kavenegar also fails, the system logs the request as `FAILED`.
+- If Kavenegar succeeds, the status is recorded as `DONE`.
 
-### 5. Error Logging and Monitoring with Sentry
+</details>
+
+<details>
+<summary><strong>Error Logging and Monitoring with Sentry</strong></summary>
+
 The project uses **Sentry** to monitor all errors and warnings during SMS processing:
-   - Sentry captures issues such as failed requests and sends alerts, allowing administrators to investigate or troubleshoot problems.
-   - All major issues in the SMS sending process are captured, helping maintain system reliability and track performance.
+- Sentry captures issues such as failed requests and sends alerts, allowing administrators to investigate or troubleshoot problems.
+- All major issues in the SMS sending process are captured, helping maintain system reliability and track performance.
 
-### 6. Tracking Request Status
+</details>
+
+<details>
+<summary><strong>Tracking Request Status</strong></summary>
+
 Each SMS request is tracked in the database with the following information:
-   - **Status** (`flag`): Indicates if the request is `PENDING`, `DONE`, or `FAILED`.
-   - **Retries** (`tries`): Counts the number of times the system attempted to send the SMS.
-   - **System Used** (`system`): Specifies which provider was used (SMS.IR or Kavenegar).
+- **Status** (`flag`): Indicates if the request is `PENDING`, `DONE`, or `FAILED`.
+- **Retries** (`tries`): Counts the number of times the system attempted to send the SMS.
+- **System Used** (`system`): Specifies which provider was used (SMS.IR or Kavenegar).
+
+</details>
 
 <details>
 <summary><strong>Features</strong></summary>
@@ -110,6 +132,50 @@ Once configured, `VerifyRequests` will log and track requests as the system oper
 ### API Endpoints
 Send SMS Endpoint: `/sendsms/` - Accepts POST requests with `phone, token_value, template_id` parameters to initiate an SMS request. <br >
 
+**Swagger**:
+You can check the request and response samples on `/swagger/`.
+
+
+## Background Tasks
+   - **process_request**: Processes an SMS request and attempts to send it via SMS.IR. If SMS.IR fails, the request is retried using Kavenegar. <br >
+   - **check_pending_requests**: A periodic task to retry any SMS requests with a pending status.
+
+
+## Access the application:
+To run the SMS Verification System, you need to start the Django development server, Celery worker, and Celery beat scheduler. Follow these steps:
+<br />
+
+### 1. Start the Django Development Server
+Run the following command to start the Django server:
+
+```
+python manage.py runserver
+```
+This command will start the server at http://127.0.0.1:8000/ by default. You can access the application via this URL in your web browser.
+
+### 2. Start the Celery Worker
+In a new terminal window, navigate to your project directory and run the Celery worker:
+
+```
+celery -A smsproject worker -l INFO --concurrency=1
+```
+This command will start the Celery worker, which processes the SMS requests in the background. The --concurrency=1 flag sets the number of concurrent worker processes to 1. Adjust this value based on your system's capabilities and needs.
+
+### 3. Start the Celery Beat Scheduler
+In another terminal window, start the Celery beat scheduler to handle periodic tasks:
+
+```
+celery -A smsproject beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+```
+This command ensures that scheduled tasks, such as retrying pending SMS requests, are executed at the specified intervals. The DatabaseScheduler allows for scheduling based on entries in the database.
+
+
+
+
+
+<!-- ############################################# -->
+
+<!--- 
 **Sample Request**:
 ```
 POST /sendsms/
@@ -122,25 +188,43 @@ Authorization: Bearer <your-auth-token>
     "template_id": 1
 }
 ```
-
-## Background Tasks
-   - **process_request**: Processes an SMS request and attempts to send it via SMS.IR. If SMS.IR fails, the request is retried using Kavenegar. <br >
-   - **check_pending_requests**: A periodic task to retry any SMS requests with a pending status.
-
+--->
 
 <!---
+## How It Works
+This project is designed to reliably send SMS messages using two providers, SMS.IR and Kavenegar, with automatic fallback and error handling. Here’s a breakdown of how it all works:
 
-Access the application: <br />
-===================================
+### 1. Sending an SMS Request 
+When a user or client makes a request to the `/sendsms/` endpoint:
+   - **Endpoint:** `/sendsms/`
+   - **Method:** `POST`
+   - The request body includes the phone number, token values, and template ID required to send the SMS.
+   - Before sending, the request goes through validation using serializers, ensuring required fields are present.
 
-Nginx will be available at `http://localhost:80`. <br />
+### 2. Processing the Request with Celery
+Once the request is validated:
+   - The `SendSmsView` view enqueues a task to Celery, which handles the SMS request in the background.
+   - **Benefits of using Celery:** This allows the main API to respond quickly while offloading the SMS sending process to Celery, which processes it asynchronously.
 
-Admin Panel: <br />
-===================================
-After running the containers, create a superuser for the Django admin panel: <br />
-```
-docker-compose exec django-app python manage.py createsuperuser
-```
-Access the admin panel at [http://localhost:80/admin](http://localhost:80/admin). <br /> 
+### 3. Sending with Primary Provider: SMS.IR
+The `process_request` task first tries to send the SMS using **SMS.IR**:
+   - If SMS.IR successfully sends the SMS, the status is recorded as `DONE`.
+   - If SMS.IR fails (e.g., due to network issues or provider limitations), Celery will log the failure and proceed to the next step.
 
+### 4. Fallback to Secondary Provider: Kavenegar
+If the SMS.IR request fails:
+   - The task automatically attempts to send the SMS via **Kavenegar**.
+   - If Kavenegar also fails, the system logs the request as `FAILED`.
+   - If Kavenegar succeeds, the status is recorded as `DONE`.
+
+### 5. Error Logging and Monitoring with Sentry
+The project uses **Sentry** to monitor all errors and warnings during SMS processing:
+   - Sentry captures issues such as failed requests and sends alerts, allowing administrators to investigate or troubleshoot problems.
+   - All major issues in the SMS sending process are captured, helping maintain system reliability and track performance.
+
+### 6. Tracking Request Status
+Each SMS request is tracked in the database with the following information:
+   - **Status** (`flag`): Indicates if the request is `PENDING`, `DONE`, or `FAILED`.
+   - **Retries** (`tries`): Counts the number of times the system attempted to send the SMS.
+   - **System Used** (`system`): Specifies which provider was used (SMS.IR or Kavenegar).
 --->
