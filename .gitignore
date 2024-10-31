@@ -1,5 +1,9 @@
 text.txt
 venv/
 
+smsproject/smsproject/__pycache__/
+smsproject/sms/__pycache__/
+smsproject/sms/migrations/ 
+
 smsproject/celery_tasks.log
 smsproject/db.sqlite3
