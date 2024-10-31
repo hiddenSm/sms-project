@@ -13,15 +13,15 @@ class Engine(models.Model):
 
 class Templates(models.Model):
     name = models.CharField(max_length=256)
-    template_id = models.IntegerField() # admin setted code for each template (for all the engines/systems)
+    template_id = models.IntegerField() # administrator setted code for each template (for all the engines/systems)
 
     def __str__(self) -> str:
         return f'{self.template_id}'
 
 class TemplatesEngine(models.Model):
     engine_key = models.ForeignKey(Engine, on_delete=models.CASCADE)
-    template_key = models.ForeignKey(Templates, on_delete=models.CASCADE) # the 
-    template_code = models.CharField(max_length=256) # code/name of each template inside each engine(system)
+    template_key = models.ForeignKey(Templates, on_delete=models.CASCADE) # the id that setted in Templates model by administrator
+    template_code = models.CharField(max_length=256) # code/name of each template inside each engine(system) provider
     token_keys = models.JSONField()
 
     def __str__(self) -> str:
@@ -39,11 +39,11 @@ class VerifyRequests(models.Model):
         SMSIR = "SI", _("SMS.IR")
         KAVENEGAR = "KN", _("KAVENEGAR")
 
-    request_sender = models.CharField(max_length=256)
-
     system = models.CharField(max_length=2, choices=System, default=System.SMSIR)
 
     flag = models.CharField(max_length=2, choices=Flag, default=Flag.PENDING)
+
+    request_sender = models.CharField(max_length=256)
 
     tries = models.IntegerField(default=0)
 

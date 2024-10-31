@@ -18,14 +18,12 @@ logger.setLevel(logging.INFO)
 # need to make the sentry c_messages and c_exceptions better and well-suited
 
 @shared_task()
-# def process_request(request_id, phone=None, token=None, template_id=None):
 def process_request(request_id, phone, token_value, template_id):
     try:
         with transaction.atomic():
             verify_request = VerifyRequests.objects.select_for_update().get(id=request_id)
 
             if verify_request.flag == VerifyRequests.Flag.PENDING:
-                # print('smsir')
                 verify_request.tries =+ 1
                 response = SmsSystem().sms_ir(phone, token_value, template_id)
                 try:
@@ -41,7 +39,6 @@ def process_request(request_id, phone, token_value, template_id):
                     capture_message("sms.ir failed. trying kavenegar", level="warning")
                 
             elif verify_request.flag == VerifyRequests.Flag.ONGOING:
-                    # print('kave')
                     verify_request.system = VerifyRequests.System.KAVENEGAR
                     response = SmsSystem().kavenegar(phone, token_value, template_id)
                     if response.get('return', {}).get('status') == 200:
@@ -64,19 +61,11 @@ def process_request(request_id, phone, token_value, template_id):
                         )
                         capture_message("Tries are full, Send user request again!! treid with both systems", level="warning")
 
-                        # logger.info(f"Attempt to send sms to {phone} via KAVENEGAR is failed.\n")
-                        # capture_message(f'SMS sending failed for {phone}. tried both systems.', level='error')
-              
             verify_request.save()
 
-    
     except VerifyRequests.DoesNotExist as ed:
         capture_exception(ed)
         logger.error(f'Verify request does not exist: {ed}')
-    
-    # except VerifyRequests.OperationalError as oe:
-    #     capture_exception(oe)
-    #     logger.error(f'Database operational error: {oe}')
 
     except Exception as e:
         capture_exception(e)
@@ -85,10 +74,7 @@ def process_request(request_id, phone, token_value, template_id):
 
 @shared_task
 def check_pending_requests():
-    # retry_requests = VerifyRequests.objects.filter(flag=VerifyRequests.Flag.RETRY)
     pending_requests = VerifyRequests.objects.filter(flag=VerifyRequests.Flag.PENDING)
-    
-    # combined_requests = retry_requests | pending_requests
 
     rp_request = [] 
     for request in pending_requests:
@@ -104,7 +90,7 @@ def check_pending_requests():
             request.template_id
         )
 
-        logger.info(f'trying again to send code to {request.phone}') # -- tries = {request.tries}.')
+        logger.info(f'trying again to send code to {request.phone}')
 
 
 ## this should be moved in some other file (like utils.py)
