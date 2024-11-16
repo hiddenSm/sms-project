@@ -8,7 +8,8 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smsproject.settings')
 
 sentry_sdk.init(
-    dsn="https://758db00baea4459cb0bb628dca4fb841@o4507849364340736.ingest.de.sentry.io/4507967444353104",
+    dsn="https://e8936cdab926c0869cd9c721f9fef26f@o4508149683585024.ingest.us.sentry.io/4508307518783488",
+    # dsn="https://758db00baea4459cb0bb628dca4fb841@o4507849364340736.ingest.de.sentry.io/4507967444353104",
     integrations=[CeleryIntegration()],
     traces_sample_rate=1.0,
 )

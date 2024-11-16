@@ -4,7 +4,7 @@ from .models import VerifyRequests
 class VerifyRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerifyRequests
-        fields = ['request_sender', 'system', 'flag'] # commented?
+        # fields = ['request_sender', 'system', 'flag'] # commented?
         fields = ['request_sender', 'phone', 'system', 'flag', 'token_value', 'template_id']
 
 class SendSmsSerializer(serializers.Serializer):
