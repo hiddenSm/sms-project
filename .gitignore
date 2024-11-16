@@ -5,6 +5,8 @@ smsproject/smsproject/__pycache__/
 smsproject/sms/__pycache__/
 # smsproject/sms/migrations/
 
-smsproject/sms/utils.py
+# smsproject/sms/utils.py
+# smsproject/sms/views_utils.py
+smsproject/sms/views_removed.txt
 smsproject/celery_tasks.log
 smsproject/db.sqlite3
